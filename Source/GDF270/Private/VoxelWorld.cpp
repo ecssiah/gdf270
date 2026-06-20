@@ -308,7 +308,7 @@ AVoxelWorld::InitPlayer()
 		{
 			const float CapsuleHalfHeight = PlayerCharacter->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 			
-			PlayerLocationOffset = CapsuleHalfHeight + 0.5f * CellSizeInCentimeters;
+			PlayerLocationOffset = CapsuleHalfHeight - 0.5f * CellSizeInCentimeters;
 		}
 		else
 		{
