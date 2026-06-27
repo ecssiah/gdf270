@@ -31,7 +31,7 @@ constexpr int32 WorldStrideZ = WorldSizeInCellsX * WorldSizeInCellsY;
 constexpr float TerrainNoisePeriod = 300.0f;
 
 constexpr int32 TerrainHeightMin = 4;
-constexpr int32 TerrainHeightMax = WorldSizeInCellsZ - 20;
+constexpr int32 TerrainHeightMax = WorldSizeInCellsZ - 10;
 
 constexpr int32 TileSizeInPixelsX = 64;
 constexpr int32 TileSizeInPixelsY = 64;
