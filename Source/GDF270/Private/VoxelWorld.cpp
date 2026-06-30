@@ -65,6 +65,41 @@ AVoxelWorld::GetPlayerSectorCoordinate() const
 	return PlayerSectorCoordinate;
 }
 
+void 
+AVoxelWorld::AddBlock()
+{
+	const APlayerController* PlayerController = Cast<APlayerController>(PlayerPawn->GetController());
+	
+	FVector StartLocation;
+	FRotator Rotation;
+	
+	PlayerController->GetPlayerViewPoint(StartLocation, Rotation);
+	
+	const FVector EndLocation = StartLocation + Rotation.Vector() * PlayerReachDistance * CellSizeInCentimeters;
+	
+	FHitResult Hit;
+	
+	GetWorld()->LineTraceSingleByChannel(
+		Hit,
+		StartLocation,
+		EndLocation,
+		ECC_Visibility
+	);
+	
+	if (Hit.bBlockingHit)
+	{
+		const FVector RemoveLocation = Hit.ImpactPoint - Hit.ImpactNormal * 0.5f;
+
+		FIntVector CellCoordinate = WorldLocationToCellCoordinate(RemoveLocation);
+	}
+}
+	
+void 
+AVoxelWorld::RemoveBlock()
+{
+
+}
+
 bool 
 AVoxelWorld::CellCoordinateIsValid(const FIntVector& CellCoordinate)
 {

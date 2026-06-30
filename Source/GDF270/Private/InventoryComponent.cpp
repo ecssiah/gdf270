@@ -1,0 +1,97 @@
+#include "InventoryComponent.h"
+
+void
+UInventoryComponent::Init()
+{
+	for (int32 StackIndex = 0; StackIndex < MaxSlots; StackIndex++)
+	{
+		FBlockStack BlockStack = {
+			.BlockKind = EBlockKind::None,
+			.Count = 0,
+		};
+		
+		SlotArray.Add(BlockStack);
+	}
+}
+
+bool 
+UInventoryComponent::HasBlock(EBlockKind BlockKind, int32 Count) const
+{
+	const FBlockStack* BlockStackPtr = SlotArray.FindByPredicate(
+		[BlockKind](const FBlockStack& Stack)
+		{
+			return Stack.BlockKind == BlockKind;
+		}
+	);
+	
+	return BlockStackPtr != nullptr;
+}
+	
+bool 
+UInventoryComponent::TryAddBlock(EBlockKind BlockKind, int32 Count)
+{
+	for (int32 StackIndex = 0; StackIndex < SlotArray.Num(); StackIndex++)
+	{
+		FBlockStack& Stack = SlotArray[StackIndex];
+		
+		if (Stack.BlockKind == BlockKind)
+		{
+			const int32 Capacity = MaxStackSize - Stack.Count;
+			
+			if (Capacity >= Count)
+			{
+				Stack.Count += Count;
+				
+				return true;
+			}
+		}
+	}
+	
+	for (int32 StackIndex = 0; StackIndex < SlotArray.Num(); StackIndex++)
+	{
+		FBlockStack& Stack = SlotArray[StackIndex];
+		
+		if (Stack.BlockKind == EBlockKind::None)
+		{
+			Stack.BlockKind = BlockKind;
+			Stack.Count = Count;
+			
+			return true;
+		}
+	}
+	
+	return false;
+}
+	
+bool 
+UInventoryComponent::TryRemoveBlock(EBlockKind BlockKind, int32 Count)
+{
+	for (int32 StackIndex = 0; StackIndex < SlotArray.Num(); StackIndex++)
+	{
+		FBlockStack& Stack = SlotArray[StackIndex];
+		
+		if (Stack.BlockKind == BlockKind)
+		{
+			if (Stack.Count >= Count)
+			{
+				Stack.Count -= Count;
+				
+				return true;
+			}
+		}
+	}
+	
+	return false;
+}
+	
+EBlockKind 
+UInventoryComponent::GetSelectedBlockKind() const
+{
+	return SlotArray[SelectedSlotIndex].BlockKind;
+}
+	
+void 
+UInventoryComponent::SelectSlot(int32 SlotIndex)
+{
+	SelectedSlotIndex = SlotIndex;
+}

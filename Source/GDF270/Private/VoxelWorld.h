@@ -27,6 +27,12 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category="Voxel")
 	FIntVector2 GetPlayerSectorCoordinate() const;
+	
+	UFUNCTION(BlueprintCallable, Category="Voxel")
+	void AddBlock();
+	
+	UFUNCTION(BlueprintCallable, Category="Voxel")
+	void RemoveBlock();
 
 protected:
 
