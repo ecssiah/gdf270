@@ -16,8 +16,8 @@ class GDF270_API UInventoryComponent : public UActorComponent
 
 public:
 	
-	void Init();
-
+	UInventoryComponent();
+	
 	UFUNCTION(BlueprintCallable)
 	bool HasBlock(EBlockKind BlockKind, int32 Count = 1) const;
 	

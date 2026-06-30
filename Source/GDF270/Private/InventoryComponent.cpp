@@ -1,7 +1,6 @@
 #include "InventoryComponent.h"
 
-void
-UInventoryComponent::Init()
+UInventoryComponent::UInventoryComponent()
 {
 	for (int32 StackIndex = 0; StackIndex < MaxSlots; StackIndex++)
 	{
@@ -18,9 +17,9 @@ bool
 UInventoryComponent::HasBlock(EBlockKind BlockKind, int32 Count) const
 {
 	const FBlockStack* BlockStackPtr = SlotArray.FindByPredicate(
-		[BlockKind](const FBlockStack& Stack)
+		[BlockKind, Count](const FBlockStack& Stack)
 		{
-			return Stack.BlockKind == BlockKind;
+			return Stack.BlockKind == BlockKind && Stack.Count >= Count;
 		}
 	);
 	
