@@ -1,28 +1,33 @@
 #include "InventoryComponent.h"
 
+#include "PlayerData.h"
+
 UInventoryComponent::UInventoryComponent()
 {
 	for (int32 StackIndex = 0; StackIndex < MaxSlots; StackIndex++)
 	{
+		FBlockStack BlockStack;
+		
 		if (StackIndex == 0)
 		{
-			FBlockStack BlockStack = {
-				.BlockKind = EBlockKind::PurpleStone,
-				.Count = 32,
-			};
-			
-			SlotArray.Add(BlockStack);
+			BlockStack.BlockKind = EBlockKind::PurpleStone;
+			BlockStack.Count = 32;
 		}
-		else
-		{
-			FBlockStack BlockStack = {
-				.BlockKind = EBlockKind::None,
-				.Count = 0,
-			};
-			
-			SlotArray.Add(BlockStack);
-		}
+
+		SlotArray.Add(BlockStack);
 	}
+}
+
+void 
+UInventoryComponent::SelectSlot(int32 SlotIndex)
+{
+	SelectedSlotIndex = SlotIndex;
+}
+	
+EBlockKind 
+UInventoryComponent::GetSelectedBlockKind() const
+{
+	return SlotArray[SelectedSlotIndex].BlockKind;
 }
 
 bool 
@@ -93,16 +98,4 @@ UInventoryComponent::TryRemoveBlock(EBlockKind BlockKind, int32 Count)
 	}
 	
 	return false;
-}
-	
-EBlockKind 
-UInventoryComponent::GetSelectedBlockKind() const
-{
-	return SlotArray[SelectedSlotIndex].BlockKind;
-}
-	
-void 
-UInventoryComponent::SelectSlot(int32 SlotIndex)
-{
-	SelectedSlotIndex = SlotIndex;
 }

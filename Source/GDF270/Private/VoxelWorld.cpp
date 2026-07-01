@@ -1,5 +1,6 @@
 #include "VoxelWorld.h"
 
+#include "PlayerData.h"
 #include "GameFramework/Character.h"
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -101,12 +102,13 @@ AVoxelWorld::TryRemoveBlockFromHit(const FHitResult& Hit)
 	
 	FCell& Cell = GetCell(CellCoordinate);
 	
+	const EBlockKind RemovedBlockKind = Cell.BlockKind;
 	Cell.BlockKind = EBlockKind::None;
 	
 	RecalculateNeighborSets(Cell);
 	RecalculateSectorMeshes(Cell);
 	
-	return Cell.BlockKind;
+	return RemovedBlockKind;
 }
 
 
@@ -372,7 +374,7 @@ AVoxelWorld::InitPlayer()
 void 
 AVoxelWorld::InitSectorCache()
 {
-	const int32 SectorCacheDiameter = 2 * SectorViewRange + 1;
+	const int32 SectorCacheDiameter = 2 * PlayerSectorViewRange + 1;
 	const int32 SectorCacheSize = SectorCacheDiameter * SectorCacheDiameter;
 	
 	for (int32 CacheIndex = 0; CacheIndex < SectorCacheSize; CacheIndex++)
@@ -405,9 +407,9 @@ AVoxelWorld::UpdateSectorComponents()
 	
 	SectorComponentMap.GetKeys(SectorCoordinateSetCurrent);
 	
-	for (int32 SectorDeltaY = -SectorViewRange; SectorDeltaY <= SectorViewRange; SectorDeltaY++)
+	for (int32 SectorDeltaY = -PlayerSectorViewRange; SectorDeltaY <= PlayerSectorViewRange; SectorDeltaY++)
 	{
-		for (int32 SectorDeltaX = -SectorViewRange; SectorDeltaX <= SectorViewRange; SectorDeltaX++)
+		for (int32 SectorDeltaX = -PlayerSectorViewRange; SectorDeltaX <= PlayerSectorViewRange; SectorDeltaX++)
 		{
 			const FIntVector2 SectorDelta = { SectorDeltaX, SectorDeltaY };
 			const FIntVector2 SectorCoordinate = PlayerSectorCoordinate + SectorDelta;
@@ -551,8 +553,6 @@ AVoxelWorld::RecalculateSectorMeshes(const FCell& Cell)
 	for (FIntVector2& SectorCoordinate : SectorCoordinateSet)
 	{
 		const int32 SectorIndex = SectorCoordinateToSectorIndex(SectorCoordinate);
-		
-		UE_LOG(LogTemp, Log, TEXT("SectorIndex: %d"), SectorIndex);
 		
 		const FSectorMesh SectorMesh = BuildSectorMesh(SectorIndex);
 		

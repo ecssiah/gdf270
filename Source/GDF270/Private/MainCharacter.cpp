@@ -1,6 +1,8 @@
 #include "MainCharacter.h"
 
+#include "PlayerData.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 AMainCharacter::AMainCharacter()
@@ -8,6 +10,8 @@ AMainCharacter::AMainCharacter()
 	PrimaryActorTick.bCanEverTick = false;
 	
 	DebugLineTrace = true;
+	
+	GetCharacterMovement()->AirControl = 1.0f;
 	
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
 	
@@ -38,7 +42,7 @@ AMainCharacter::AddBlock()
 		}
 	}
 }
-	
+
 void 
 AMainCharacter::RemoveBlock()
 {

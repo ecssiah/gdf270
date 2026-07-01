@@ -44,10 +44,6 @@ constexpr int32 TileAtlasSizeV = 4;
 constexpr float TileSizeU = 1.0f / static_cast<float>(TileAtlasSizeU);
 constexpr float TileSizeV = 1.0f / static_cast<float>(TileAtlasSizeV);
 
-constexpr int32 SectorViewRange = 2;
-
-constexpr float PlayerReachDistance = 2.0f;
-
 UENUM()
 enum class EAxisDirection : uint8
 {
@@ -145,16 +141,4 @@ struct FSectorMesh
 {
 	int32 SectorIndex;
 	TArray<FSectorFace> SectorFaceArray;
-};
-
-USTRUCT(BlueprintType)
-struct FBlockStack
-{
-	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EBlockKind BlockKind = EBlockKind::None;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Count = 0;
 };

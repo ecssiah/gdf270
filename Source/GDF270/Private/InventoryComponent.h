@@ -1,8 +1,7 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PlayerData.h"
 #include "WorldData.h"
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
@@ -19,6 +18,12 @@ public:
 	UInventoryComponent();
 	
 	UFUNCTION(BlueprintCallable)
+	void SelectSlot(int32 SlotIndex);
+	
+	UFUNCTION(BlueprintCallable)
+	EBlockKind GetSelectedBlockKind() const;
+	
+	UFUNCTION(BlueprintCallable)
 	bool HasBlock(EBlockKind BlockKind, int32 Count = 1) const;
 	
 	UFUNCTION(BlueprintCallable)
@@ -26,12 +31,6 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	bool TryRemoveBlock(EBlockKind BlockKind, int32 Count = 1);
-	
-	UFUNCTION(BlueprintCallable)
-	EBlockKind GetSelectedBlockKind() const;
-	
-	UFUNCTION(BlueprintCallable)
-	void SelectSlot(int32 SlotIndex);
 
 private:
 
