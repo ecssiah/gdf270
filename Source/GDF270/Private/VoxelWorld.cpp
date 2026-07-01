@@ -66,6 +66,55 @@ AVoxelWorld::GetPlayerSectorCoordinate() const
 }
 
 bool 
+AVoxelWorld::TryAddBlockFromHit(const FHitResult& Hit, EBlockKind BlockKind)
+{
+	const FVector AddLocation = Hit.ImpactPoint + Hit.ImpactNormal * 0.5f;
+	
+	const FIntVector CellCoordinate = WorldLocationToCellCoordinate(AddLocation);
+	
+	if (!CellCoordinateIsValid(CellCoordinate))
+	{
+		return false;
+	}
+	
+	FCell& Cell = GetCell(CellCoordinate);
+	
+	Cell.BlockKind = BlockKind;
+	
+	RecalculateNeighborSets(Cell);
+	RecalculateSectorMeshes(Cell);
+	
+	UE_LOG(LogTemp, Warning, TEXT("Add Cell: %d %d %d"), CellCoordinate.X, CellCoordinate.Y, CellCoordinate.Z);
+	
+	return true;
+}
+
+EBlockKind
+AVoxelWorld::TryRemoveBlockFromHit(const FHitResult& Hit)
+{
+	const FVector RemoveLocation = Hit.ImpactPoint - Hit.ImpactNormal * 0.5f;
+	
+	const FIntVector CellCoordinate = WorldLocationToCellCoordinate(RemoveLocation);
+
+	if (!CellCoordinateIsValid(CellCoordinate))
+	{
+		return EBlockKind::None;
+	}
+	
+	FCell& Cell = GetCell(CellCoordinate);
+	
+	Cell.BlockKind = EBlockKind::None;
+	
+	RecalculateNeighborSets(Cell);
+	RecalculateSectorMeshes(Cell);
+	
+	UE_LOG(LogTemp, Warning, TEXT("Remove Cell: %d %d %d"), CellCoordinate.X, CellCoordinate.Y, CellCoordinate.Z);
+	
+	return Cell.BlockKind;
+}
+
+
+bool 
 AVoxelWorld::CellCoordinateIsValid(const FIntVector& CellCoordinate)
 {
 	return (
@@ -123,6 +172,15 @@ AVoxelWorld::SectorCoordinateToSectorIndex(const FIntVector2& SectorCoordinate)
 	return SectorCoordinate.X + SectorCoordinate.Y * WorldSizeInSectorsX;
 }
 
+FIntVector2 
+AVoxelWorld::CellCoordinateToSectorCoordinate(const FIntVector& CellCoordinate)
+{
+	return {
+		CellCoordinate.X >> SectorSizeInCellsXLog2,
+		CellCoordinate.Y >> SectorSizeInCellsYLog2,
+	};
+}
+
 FIntVector 
 AVoxelWorld::SectorCoordinateToCellCoordinate(const FIntVector2& SectorCoordinate)
 {
@@ -148,10 +206,7 @@ AVoxelWorld::WorldLocationToSectorCoordinate(const FVector& WorldLocation)
 {
 	const FIntVector CellCoordinate = WorldLocationToCellCoordinate(WorldLocation);
 	
-	return {
-		CellCoordinate.X >> SectorSizeInCellsXLog2,
-		CellCoordinate.Y >> SectorSizeInCellsYLog2,
-	};
+	return CellCoordinateToSectorCoordinate(CellCoordinate);
 }
 
 FCell& 
@@ -446,4 +501,64 @@ AVoxelWorld::CalculateNeighborSet(const FCell& Cell)
 	}
 	
 	return NeighborSet;
+}
+
+void 
+AVoxelWorld::RecalculateNeighborSets(const FCell& Cell)
+{
+	const FIntVector OriginCellCoordinate = CellIndexToCellCoordinate(Cell.CellIndex);
+	
+	for (int32 DeltaZ = -1; DeltaZ <= 1; DeltaZ++)
+	{
+		for (int32 DeltaY = -1; DeltaY <= 1; DeltaY++)
+		{
+			for (int32 DeltaX = -1; DeltaX <= 1; DeltaX++)
+			{
+				const FIntVector CellCoordinate = OriginCellCoordinate + FIntVector(DeltaX, DeltaY, DeltaZ); 
+				
+				if (CellCoordinateIsValid(CellCoordinate))
+				{
+					FCell& TestCell = GetCell(CellCoordinate);
+					
+					TestCell.NeighborSet = CalculateNeighborSet(TestCell);
+				}
+			}
+		}
+	}
+}
+
+void 
+AVoxelWorld::RecalculateSectorMeshes(const FCell& Cell)
+{
+	TSet<FIntVector2> SectorCoordinateSet;
+	
+	const FIntVector OriginCellCoordinate = CellIndexToCellCoordinate(Cell.CellIndex);
+	
+	for (int32 DeltaZ = -1; DeltaZ <= 1; DeltaZ++)
+	{
+		for (int32 DeltaY = -1; DeltaY <= 1; DeltaY++)
+		{
+			for (int32 DeltaX = -1; DeltaX <= 1; DeltaX++)
+			{
+				const FIntVector CellCoordinate = OriginCellCoordinate + FIntVector(DeltaX, DeltaY, DeltaZ); 
+				
+				if (CellCoordinateIsValid(CellCoordinate))
+				{
+					FIntVector2 SectorCoordinate = CellCoordinateToSectorCoordinate(CellCoordinate);
+					
+					SectorCoordinateSet.Add(SectorCoordinate);
+				}
+			}
+		}
+	}
+	
+	for (FIntVector2& SectorCoordinate : SectorCoordinateSet)
+	{
+		const int32 SectorIndex = SectorCoordinateToSectorIndex(SectorCoordinate);
+		
+		const FSectorMesh SectorMesh = BuildSectorMesh(SectorIndex);
+		
+		RemoveSectorComponent(SectorCoordinate);
+		AddSectorComponent(SectorCoordinate);
+	}
 }

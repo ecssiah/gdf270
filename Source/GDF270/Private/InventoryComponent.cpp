@@ -4,12 +4,24 @@ UInventoryComponent::UInventoryComponent()
 {
 	for (int32 StackIndex = 0; StackIndex < MaxSlots; StackIndex++)
 	{
-		FBlockStack BlockStack = {
-			.BlockKind = EBlockKind::None,
-			.Count = 0,
-		};
-		
-		SlotArray.Add(BlockStack);
+		if (StackIndex == 0)
+		{
+			FBlockStack BlockStack = {
+				.BlockKind = EBlockKind::PurpleStone,
+				.Count = 32,
+			};
+			
+			SlotArray.Add(BlockStack);
+		}
+		else
+		{
+			FBlockStack BlockStack = {
+				.BlockKind = EBlockKind::None,
+				.Count = 0,
+			};
+			
+			SlotArray.Add(BlockStack);
+		}
 	}
 }
 

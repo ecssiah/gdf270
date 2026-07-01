@@ -27,6 +27,9 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category="Voxel")
 	FIntVector2 GetPlayerSectorCoordinate() const;
+	
+	bool TryAddBlockFromHit(const FHitResult& Hit, EBlockKind BlockKind);
+	EBlockKind TryRemoveBlockFromHit(const FHitResult& Hit);
 
 protected:
 
@@ -53,6 +56,8 @@ private:
 	static bool SectorCoordinateIsValid(const FIntVector2& SectorCoordinate);
 	static FIntVector2 SectorIndexToSectorCoordinate(int32 SectorIndex);
 	static int32 SectorCoordinateToSectorIndex(const FIntVector2& SectorCoordinate);
+	
+	static FIntVector2 CellCoordinateToSectorCoordinate(const FIntVector& CellCoordinate);
 	static FIntVector SectorCoordinateToCellCoordinate(const FIntVector2& SectorCoordinate);
 	
 	static FIntVector WorldLocationToCellCoordinate(const FVector& WorldLocation);
@@ -74,5 +79,8 @@ private:
 	void RemoveSectorComponent(const FIntVector2& SectorCoordinate);
 	
 	uint8 CalculateNeighborSet(const FCell& Cell);
+	
+	void RecalculateNeighborSets(const FCell& Cell);
+	void RecalculateSectorMeshes(const FCell& Cell);
 	
 };

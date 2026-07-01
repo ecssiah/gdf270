@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "InventoryComponent.h"
+#include "VoxelWorld.h"
 #include "GameFramework/Character.h"
 #include "MainCharacter.generated.h"
 
@@ -22,7 +23,14 @@ public:
 
 private:
 	
+	bool DebugLineTrace;
+	
+	UPROPERTY()
+	TObjectPtr<AVoxelWorld> VoxelWorld;
+	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UInventoryComponent> InventoryComponent;
+	
+	FHitResult RunLineTrace();
 	
 };

@@ -1,15 +1,62 @@
 #include "MainCharacter.h"
 
+#include "Kismet/GameplayStatics.h"
+
 
 AMainCharacter::AMainCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 	
+	DebugLineTrace = true;
+	
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory"));
+	
+	VoxelWorld = Cast<AVoxelWorld>(
+		UGameplayStatics::GetActorOfClass(this, AVoxelWorld::StaticClass())
+	);
 }
 
 void 
 AMainCharacter::AddBlock()
+{
+	const EBlockKind SelectedBlockKind = InventoryComponent->GetSelectedBlockKind();
+	
+	if (SelectedBlockKind == EBlockKind::None)
+	{
+		return;
+	}
+	
+	const FHitResult Hit = RunLineTrace();
+
+	if (Hit.bBlockingHit)
+	{
+		const bool AddResult = VoxelWorld->TryAddBlockFromHit(Hit, SelectedBlockKind);
+		
+		if (AddResult)
+		{
+			InventoryComponent->TryRemoveBlock(SelectedBlockKind);
+		}
+	}
+}
+	
+void 
+AMainCharacter::RemoveBlock()
+{
+	const FHitResult Hit = RunLineTrace();
+	
+	if (Hit.bBlockingHit)
+	{
+		const EBlockKind RemovedBlockKind = VoxelWorld->TryRemoveBlockFromHit(Hit);
+		
+		if (RemovedBlockKind != EBlockKind::None)
+		{
+			InventoryComponent->TryAddBlock(RemovedBlockKind);
+		}
+	}
+}
+
+FHitResult 
+AMainCharacter::RunLineTrace()
 {
 	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
 	
@@ -28,37 +75,35 @@ AMainCharacter::AddBlock()
 		EndLocation,
 		ECC_Visibility
 	);
-
-	DrawDebugLine(
-		GetWorld(),
-		StartLocation,
-		EndLocation,
-		FColor::Red,
-		false,
-		5.0f,
-		0,
-		1.0f
-	);
+	
+	if (DebugLineTrace)
+	{
+		DrawDebugLine(
+			GetWorld(),
+			StartLocation,
+			EndLocation,
+			FColor::Red,
+			false,
+			5.0f,
+			0,
+			1.0f
+		);
+	}
 
 	if (Hit.bBlockingHit)
 	{
-		DrawDebugPoint(
-			GetWorld(),
-			Hit.ImpactPoint,
-			50.0f,
-			FColor::Green,
-			false,
-			5.0f
-		);
-		
-		const FVector RemoveLocation = Hit.ImpactPoint - Hit.ImpactNormal * 0.5f;
-
-		// FIntVector CellCoordinate = WorldLocationToCellCoordinate(RemoveLocation);
+		if (DebugLineTrace)
+		{
+			DrawDebugPoint(
+				GetWorld(),
+				Hit.ImpactPoint,
+				50.0f,
+				FColor::Green,
+				false,
+				5.0f
+			);
+		}
 	}
-}
 	
-void 
-AMainCharacter::RemoveBlock()
-{
-
+	return Hit;
 }
