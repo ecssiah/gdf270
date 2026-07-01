@@ -84,8 +84,6 @@ AVoxelWorld::TryAddBlockFromHit(const FHitResult& Hit, EBlockKind BlockKind)
 	RecalculateNeighborSets(Cell);
 	RecalculateSectorMeshes(Cell);
 	
-	UE_LOG(LogTemp, Warning, TEXT("Add Cell: %d %d %d"), CellCoordinate.X, CellCoordinate.Y, CellCoordinate.Z);
-	
 	return true;
 }
 
@@ -107,8 +105,6 @@ AVoxelWorld::TryRemoveBlockFromHit(const FHitResult& Hit)
 	
 	RecalculateNeighborSets(Cell);
 	RecalculateSectorMeshes(Cell);
-	
-	UE_LOG(LogTemp, Warning, TEXT("Remove Cell: %d %d %d"), CellCoordinate.X, CellCoordinate.Y, CellCoordinate.Z);
 	
 	return Cell.BlockKind;
 }
@@ -556,7 +552,11 @@ AVoxelWorld::RecalculateSectorMeshes(const FCell& Cell)
 	{
 		const int32 SectorIndex = SectorCoordinateToSectorIndex(SectorCoordinate);
 		
+		UE_LOG(LogTemp, Log, TEXT("SectorIndex: %d"), SectorIndex);
+		
 		const FSectorMesh SectorMesh = BuildSectorMesh(SectorIndex);
+		
+		SectorMeshArray[SectorIndex] = SectorMesh;
 		
 		RemoveSectorComponent(SectorCoordinate);
 		AddSectorComponent(SectorCoordinate);
